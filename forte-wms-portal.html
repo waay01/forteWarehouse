@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forte WMS — Портал складских операций</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --forte-red: #C8102E;
+    --forte-dark: #0f1117;
+    --forte-card: #171b24;
+    --forte-border: #242836;
+    --forte-muted: #2e3447;
+    --forte-text: #e8eaf0;
+    --forte-sub: #8892a4;
+    --forte-accent: #ff3352;
+    --forte-gold: #f5a623;
+    --forte-green: #22c55e;
+    --forte-blue: #3b82f6;
+    --radius: 12px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--forte-dark);
+    color: var(--forte-text);
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── TOP HEADER ── */
+  .top-header {
+    background: #0a0c12;
+    border-bottom: 1px solid var(--forte-border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 38px;
+    height: 38px;
+    background: var(--forte-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(0 0, 85% 0, 100% 15%, 100% 100%, 15% 100%, 0 85%);
+  }
+
+  .logo-icon svg { width: 22px; height: 22px; fill: white; }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+
+  .logo-text .brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    color: white;
+  }
+
+  .logo-text .sub {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: var(--forte-red);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .header-nav {
+    display: flex;
+    gap: 4px;
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--forte-sub);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: var(--transition);
+    position: relative;
+  }
+
+  .nav-btn:hover { color: var(--forte-text); background: var(--forte-muted); }
+
+  .nav-btn.active {
+    color: var(--forte-red);
+    background: rgba(200,16,46,0.1);
+  }
+
+  .nav-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: var(--forte-red);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--forte-green);
+    box-shadow: 0 0 8px var(--forte-green);
+    animation: pulse-green 2s infinite;
+  }
+
+  @keyframes pulse-green {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--forte-green); }
+    50% { opacity: 0.7; box-shadow: 0 0 16px var(--forte-green); }
+  }
+
+  .status-label {
+    font-size: 0.7rem;
+    color: var(--forte-green);
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── HERO (Главная) ── */
+  .hero {
+    padding: 3rem 2rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .hero-main {
+    grid-column: 1 / 3;
+    background: linear-gradient(135deg, #1a0810 0%, #0f1117 60%);
+    border: 1px solid rgba(200,16,46,0.3);
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-main::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(200,16,46,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--forte-red);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 2px;
+    background: var(--forte-red);
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    line-height: 1;
+    letter-spacing: 2px;
+    color: white;
+    margin-bottom: 1rem;
+  }
+
+  .hero-title span { color: var(--forte-red); }
+
+  .hero-desc {
+    font-size: 0.9rem;
+    color: var(--forte-sub);
+    line-height: 1.7;
+    max-width: 420px;
+    margin-bottom: 2rem;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--forte-red);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary:hover {
+    background: #e8132f;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(200,16,46,0.4);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--forte-text);
+    border: 1px solid var(--forte-border);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--forte-red);
+    color: var(--forte-red);
+    background: rgba(200,16,46,0.05);
+  }
+
+  /* Quick stats card */
+  .stats-card {
+    background: var(--forte-card);
+    border: 1px solid var(--forte-border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .stats-label {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--forte-sub);
+    font-weight: 600;
+    margin-bottom: 2rem;
+  }
+
+  .stats-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--forte-border);
+  }
+
+  .stat-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .stat-name {
+    font-size: 0.82rem;
+    color: var(--forte-sub);
+    font-weight: 500;
+  }
+
+  .stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+
+  .stat-val.green { background: rgba(34,197,94,0.1); color: var(--forte-green); }
+  .stat-val.red { background: rgba(200,16,46,0.1); color: var(--forte-red); }
+  .stat-val.gold { background: rgba(245,166,35,0.1); color: var(--forte-gold); }
+  .stat-val.blue { background: rgba(59,130,246,0.1); color: var(--forte-blue); }
+
+  /* ── QUICK ACCESS GRID ── */
+  .quick-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    color: white;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 2rem;
+  }
+
+  .quick-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--forte-border);
+  }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    padding: 0 2rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .quick-card {
+    background: var(--forte-card);
+    border: 1px solid var(--forte-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .quick-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--card-color, var(--forte-red));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .quick-card:hover {
+    border-color: var(--card-color, var(--forte-red));
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+  }
+
+  .quick-card:hover::before { transform: scaleX(1); }
+
+  .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
+
+  .card-title {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--forte-text);
+  }
+
+  .card-sub {
+    font-size: 0.75rem;
+    color: var(--forte-sub);
+    line-height: 1.5;
+  }
+
+  .card-arrow {
+    margin-top: auto;
+    color: var(--forte-sub);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition);
+  }
+
+  .quick-card:hover .card-arrow {
+    color: var(--card-color, var(--forte-red));
+    gap: 10px;
+  }
+
+  /* ══════════════════════════════
+      ИНСТРУКЦИЯ PAGE
+  ══════════════════════════════ */
+  .manual-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 64px);
+  }
+
+  .manual-sidebar {
+    background: #0a0c12;
+    border-right: 1px solid var(--forte-border);
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-section-title {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--forte-red);
+    font-weight: 700;
+    padding: 8px 1.5rem;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 1.5rem;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--forte-sub);
+    font-weight: 500;
+    transition: var(--transition);
+    border-left: 2px solid transparent;
+  }
+
+  .sidebar-item:hover {
+    color: var(--forte-text);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .sidebar-item.active {
+    color: var(--forte-text);
+    background: rgba(200,16,46,0.08);
+    border-left-color: var(--forte-red);
+  }
+
+  .sidebar-item .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--forte-red);
+    min-width: 20px;
+    font-weight: 600;
+  }
+
+  .sub-item {
+    padding-left: 2.8rem;
+    font-size: 0.78rem;
+  }
+
+  .sub-sub-item {
+    padding-left: 3.6rem;
+    font-size: 0.75rem;
+  }
+
+  /* Manual content */
+  .manual-content {
+    padding: 2.5rem;
+    max-width: 860px;
+  }
+
+  .manual-section {
+    display: none;
+  }
+
+  .manual-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(200,16,46,0.1);
+    border: 1px solid rgba(200,16,46,0.2);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--forte-red);
+    margin-bottom: 1rem;
+  }
+
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    letter-spacing: 2px;
+    color: white;
+    margin-bottom: 1rem;
+    line-height: 1;
+  }
+
+  .section-intro {
+    font-size: 0.92rem;
+    color: var(--forte-sub);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    border-left: 3px solid var(--forte-red);
+    padding-left: 1rem;
+  }
+
+  /* Steps */
+  .steps { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+
+  .step {
+    background: var(--forte-card);
+    border: 1px solid var(--forte-border);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    transition: var(--transition);
+  }
+
+  .step:hover {
+    border-color: rgba(200,16,46,0.3);
+  }
+
+  .step-num {
+    min-width: 32px;
+    height: 32px;
+    background: var(--forte-red);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .step-content {}
+
+  .step-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--forte-text);
+    margin-bottom: 4px;
+  }
+
+  .step-desc {
+    font-size: 0.83rem;
+    color: var(--forte-sub);
+    line-height: 1.6;
+  }
+
+  .step-desc strong { color: var(--forte-text); }
+
+  /* Flow diagram */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+    background: var(--forte-card);
+    border: 1px solid var(--forte-border);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.5rem;
+    overflow-x: auto;
+  }
+
+  .flow-step {
+    background: rgba(200,16,46,0.1);
+    border: 1px solid rgba(200,16,46,0.25);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--forte-text);
+    text-align: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .flow-arrow {
+    color: var(--forte-red);
+    font-size: 1rem;
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+
+  /* Info box */
+  .info-box {
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.5rem;
+    margin: 1rem 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .info-box .icon { font-size: 1.2rem; flex-shrink: 0; }
+
+  .info-box p {
+    font-size: 0.85rem;
+    color: var(--forte-sub);
+    line-height: 1.6;
+  }
+
+  .info-box p strong { color: var(--forte-text); }
+
+  .warn-box {
+    background: rgba(245,166,35,0.08);
+    border: 1px solid rgba(245,166,35,0.2);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.5rem;
+    margin: 1rem 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .warn-box p {
+    font-size: 0.85rem;
+    color: var(--forte-sub);
+    line-height: 1.6;
+  }
+
+  .warn-box p strong { color: var(--forte-gold); }
+
+  /* TSD screen mockup */
+  .tsd-screen {
+    background: #1a1f2e;
+    border: 2px solid #2e3447;
+    border-radius: 8px;
+    padding: 0;
+    width: 220px;
+    font-family: 'JetBrains Mono', monospace;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  .tsd-titlebar {
+    background: var(--forte-red);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 6px 10px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .tsd-body {
+    padding: 10px;
+    min-height: 80px;
+  }
+
+  .tsd-row {
+    font-size: 0.65rem;
+    color: #a0aec0;
+    padding: 2px 0;
+    display: flex;
+    gap: 6px;
+  }
+
+  .tsd-row .key { color: #718096; min-width: 60px; }
+  .tsd-row .val { color: #e2e8f0; font-weight: 600; }
+
+  .tsd-divider {
+    border: none;
+    border-top: 1px dashed #2e3447;
+    margin: 6px 0;
+  }
+
+  .tsd-instruction {
+    font-size: 0.68rem;
+    color: #f0f0f0;
+    text-align: center;
+    padding: 6px 0;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .tsd-button-area {
+    background: #0f1117;
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .tsd-btn {
+    font-size: 0.6rem;
+    color: #ffd700;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .with-tsd {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+  }
+
+  .with-tsd .text-side {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  /* Subsection headings */
+  .sub-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    color: white;
+    margin: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sub-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--forte-border);
+    max-width: 200px;
+  }
+
+  /* ══════════════════════════════
+      QR GENERATOR PAGE
+  ══════════════════════════════ */
+  .qr-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+  }
+
+  .qr-page-header {
+    margin-bottom: 2rem;
+  }
+
+  .qr-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .qr-tab {
+    background: var(--forte-card);
+    border: 1px solid var(--forte-border);
+    color: var(--forte-sub);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .qr-tab:hover { border-color: var(--forte-red); color: var(--forte-text); }
+
+  .qr-tab.active {
+    background: rgba(200,16,46,0.12);
+    border-color: var(--forte-red);
+    color: white;
+  }
+
+  .qr-generator-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .qr-form-card {
+    background: var(--forte-card);
+    border: 1px solid var(--forte-border);
+    border-radius: var(--radius);
+    padding: 1.8rem;
+  }
+
+  .form-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    color: white;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .form-title .emoji { font-size: 1.2rem; }
+
+  .form-group { margin-bottom: 1rem; }
+
+  .form-group label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--forte-sub);
+    margin-bottom: 6px;
+  }
+
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--forte-dark);
+    border: 1px solid var(--forte-border);
+    border-radius: 8px;
+    color: var(--forte-text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--forte-red);
+    box-shadow: 0 0 0 3px rgba(200,16,46,0.1);
+  }
+
+  .form-group select option { background: var(--forte-card); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .qr-preview-card {
+    background: var(--forte-card);
+    border: 1px solid var(--forte-border);
+    border-radius: var(--radius);
+    padding: 1.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .qr-preview-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--forte-sub);
+    align-self: flex-start;
+  }
+
+  .qr-canvas-wrapper {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 200px;
+    min-height: 200px;
+    position: relative;
+  }
+
+  #qr-output { }
+
+  .qr-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: #bbb;
+  }
+
+  .qr-placeholder svg { width: 48px; height: 48px; opacity: 0.3; }
+
+  .qr-placeholder span { font-size: 0.8rem; font-weight: 500; }
+
+  .qr-label-display {
+    text-align: center;
+    background: var(--forte-dark);
+    border: 1px solid var(--forte-border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    width: 100%;
+  }
+
+  .qr-label-display .lbl-type {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--forte-red);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .qr-label-display .lbl-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    word-break: break-all;
+  }
+
+  .qr-action-btns {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .qr-action-btns button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .btn-download {
+    background: var(--forte-red);
+    color: white;
+    border: none;
+  }
+
+  .btn-download:hover {
+    background: #e8132f;
+    box-shadow: 0 4px 16px rgba(200,16,46,0.4);
+  }
+
+  .btn-print {
+    background: transparent;
+    color: var(--forte-text);
+    border: 1px solid var(--forte-border);
+  }
+
+  .btn-print:hover { border-color: var(--forte-red); color: var(--forte-red); }
+
+  /* Batch QR */
+  .batch-section {
+    margin-top: 2rem;
+    background: var(--forte-card);
+    border: 1px solid var(--forte-border);
+    border-radius: var(--radius);
+    padding: 1.8rem;
+  }
+
+  .batch-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    color: white;
+    margin-bottom: 1rem;
+  }
+
+  .batch-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .batch-item {
+    background: var(--forte-dark);
+    border: 1px solid var(--forte-border);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .batch-item:hover {
+    border-color: var(--forte-red);
+    transform: scale(1.02);
+  }
+
+  .batch-item .bi-qr {
+    background: white;
+    border-radius: 6px;
+    padding: 6px;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .batch-item .bi-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--forte-text);
+    text-align: center;
+    word-break: break-all;
+  }
+
+  .batch-item .bi-type {
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--forte-red);
+    font-weight: 600;
+  }
+
+  /* ══ SCROLLBAR ══ */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--forte-muted); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--forte-red); }
+
+  /* ══ PRINT ══ */
+  @media print {
+    .top-header, .manual-sidebar, .qr-tabs, .qr-form-card, .batch-section { display: none !important; }
+    .qr-preview-card { box-shadow: none; border: none; }
+    .qr-canvas-wrapper { margin: 0 auto; }
+  }
+
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-main { grid-column: 1; }
+    .quick-grid { grid-template-columns: 1fr 1fr; }
+    .manual-layout { grid-template-columns: 1fr; }
+    .manual-sidebar { display: none; }
+    .qr-generator-area { grid-template-columns: 1fr; }
+    .header-nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ HEADER ════════════ -->
+<header class="top-header">
+  <div class="logo-area">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 5l4-4 4 4-4 4z"/></svg>
+    </div>
+    <div class="logo-text">
+      <span class="brand">FORTE WMS</span>
+      <span class="sub">Складской портал</span>
+    </div>
+  </div>
+
+  <nav class="header-nav">
+    <button class="nav-btn active" onclick="showPage('home', this)">Главная</button>
+    <button class="nav-btn" onclick="showPage('manual', this)">Инструкция ТСД</button>
+    <button class="nav-btn" onclick="showPage('qr', this)">QR-генератор</button>
+  </nav>
+
+  <div class="header-right">
+    <div class="status-dot"></div>
+    <span class="status-label">СИСТЕМА АКТИВНА</span>
+  </div>
+</header>
+
+<!-- ════════════ HOME PAGE ════════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-grid">
+      <div class="hero-main">
+        <div class="hero-eyebrow">Forte Holding — Складской комплекс</div>
+        <div class="hero-title">FORTE<br><span>WMS</span> ПОРТАЛ</div>
+        <p class="hero-desc">Единая точка доступа для сотрудников склада. Инструкции по работе с ТСД, генерация QR-кодов для оператора, сотрудников, ячеек и оборудования.</p>
+        <div class="hero-btns">
+          <button class="btn-primary" onclick="showPage('manual', document.querySelector('.nav-btn:nth-child(2)'))">
+            📖 Открыть инструкцию
+          </button>
+          <button class="btn-outline" onclick="showPage('qr', document.querySelector('.nav-btn:nth-child(3)'))">
+            ⬛ QR-генератор
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-card">
+        <div class="stats-label">Статус системы LEAD WMS</div>
+        <div class="stats-list">
+          <div class="stat-item">
+            <span class="stat-name">Версия клиента</span>
+            <span class="stat-val blue">1.30.80.45</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-name">Режим авторизации</span>
+            <span class="stat-val green">QR-код</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-name">Кладовщики</span>
+            <span class="stat-val green">Активны</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-name">Погрузчики</span>
+            <span class="stat-val green">Активны</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-name">Инвентаризация</span>
+            <span class="stat-val gold">По заданию</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-title">БЫСТРЫЙ ДОСТУП</div>
+  <div class="quick-grid">
+    <div class="quick-card" style="--card-color: #C8102E" onclick="showPage('manual', null, 'sec-auth')">
+      <div class="card-icon">🔑</div>
+      <div class="card-title">Авторизация</div>
+      <div class="card-sub">Вход в систему, сканирование QR-кода учётной записи</div>
+      <div class="card-arrow">Открыть → </div>
+    </div>
+    <div class="quick-card" style="--card-color: #3b82f6" onclick="showPage('manual', null, 'sec-pick')">
+      <div class="card-icon">📦</div>
+      <div class="card-title">Отбор товара</div>
+      <div class="card-sub">Сбор товаров со склада, работа с паллетами и транзитными зонами</div>
+      <div class="card-arrow">Открыть → </div>
+    </div>
+    <div class="quick-card" style="--card-color: #22c55e" onclick="showPage('manual', null, 'sec-move')">
+      <div class="card-icon">🔄</div>
+      <div class="card-title">Перемещение</div>
+      <div class="card-sub">Ручное перемещение ОС, режим погрузчиков</div>
+      <div class="card-arrow">Открыть → </div>
+    </div>
+    <div class="quick-card" style="--card-color: #f5a623" onclick="showPage('manual', null, 'sec-inv')">
+      <div class="card-icon">🗂️</div>
+      <div class="card-title">Инвентаризация</div>
+      <div class="card-sub">Пересчёт товара в ячейках, работа по заданиям оператора</div>
+      <div class="card-arrow">Открыть → </div>
+    </div>
+    <div class="quick-card" style="--card-color: #a855f7" onclick="showPage('qr', null, 'tab-employee')">
+      <div class="card-icon">👤</div>
+      <div class="card-title">QR сотрудника</div>
+      <div class="card-sub">Генерация личных QR-кодов для авторизации на ТСД</div>
+      <div class="card-arrow">Создать → </div>
+    </div>
+    <div class="quick-card" style="--card-color: #06b6d4" onclick="showPage('qr', null, 'tab-cell')">
+      <div class="card-icon">🏪</div>
+      <div class="card-title">QR ячейки / сектора</div>
+      <div class="card-sub">Штрихкоды для складских ячеек, секторов и мест хранения</div>
+      <div class="card-arrow">Создать → </div>
+    </div>
+    <div class="quick-card" style="--card-color: #f43f5e" onclick="showPage('qr', null, 'tab-pallet')">
+      <div class="card-icon">🪣</div>
+      <div class="card-title">QR паллета (ОС)</div>
+      <div class="card-sub">Этикетки для объектов складирования и транзитных паллет</div>
+      <div class="card-arrow">Создать → </div>
+    </div>
+    <div class="quick-card" style="--card-color: #84cc16" onclick="showPage('qr', null, 'tab-dock')">
+      <div class="card-icon">🚪</div>
+      <div class="card-title">QR дока / склада</div>
+      <div class="card-sub">Маркировка доков, транзитных зон и складских помещений</div>
+      <div class="card-arrow">Создать → </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ MANUAL PAGE ════════════ -->
+<div id="page-manual" class="page">
+  <div class="manual-layout">
+    <nav class="manual-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Содержание</div>
+        <div class="sidebar-item active" onclick="showSection('sec-auth', this)">
+          <span class="num">1</span> Авторизация
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Кладовщики</div>
+        <div class="sidebar-item" onclick="showSection('sec-pick', this)">
+          <span class="num">2.1</span> Отбор товара
+        </div>
+        <div class="sidebar-item sub-item" onclick="showSection('sec-pick-simple', this)">
+          <span class="num">2.1.1</span> Без разделения
+        </div>
+        <div class="sidebar-item sub-item" onclick="showSection('sec-pick-split', this)">
+          <span class="num">2.1.2</span> С разделением
+        </div>
+        <div class="sidebar-item" onclick="showSection('sec-info', this)">
+          <span class="num">2.2</span> Информация об ОС
+        </div>
+        <div class="sidebar-item" onclick="showSection('sec-move', this)">
+          <span class="num">2.3</span> Ручное перемещение
+        </div>
+        <div class="sidebar-item" onclick="showSection('sec-inv', this)">
+          <span class="num">2.4</span> Инвентаризация
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Погрузчики</div>
+        <div class="sidebar-item" onclick="showSection('sec-loader-move', this)">
+          <span class="num">3.1</span> Перемещение
+        </div>
+        <div class="sidebar-item" onclick="showSection('sec-loader-info', this)">
+          <span class="num">3.2</span> Информация по объекту
+        </div>
+      </div>
+    </nav>
+
+    <div class="manual-content">
+
+      <!-- 1. АВТОРИЗАЦИЯ -->
+      <div id="sec-auth" class="manual-section active">
+        <div class="section-badge">📖 Раздел 1</div>
+        <div class="section-heading">АВТОРИЗАЦИЯ</div>
+        <p class="section-intro">Для начала работы включите ТСД и откройте приложение <strong>«LEAD WMS»</strong>. На экране отобразится запрос на авторизацию.</p>
+
+        <div class="with-tsd">
+          <div class="text-side">
+            <div class="steps">
+              <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                  <div class="step-title">Включите ТСД, откройте LEAD WMS</div>
+                  <div class="step-desc">На экране отобразится запрос авторизации с надписью <strong>«СКАНИРУЙТЕ ЛИЧНУЮ КАРТОЧКУ ДЛЯ НАЧАЛА РАБОТЫ»</strong></div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                  <div class="step-title">Отсканируйте QR-код учётной записи</div>
+                  <div class="step-desc">Допускается использование распечатанной версии или QR-кода с сайта генератора. После сканирования ТСД отобразит имя пользователя.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                  <div class="step-title">Повторно отсканируйте QR-код</div>
+                  <div class="step-desc">На данном этапе необходимо повторно отсканировать QR-код. После этого осуществляется переход в <strong>главное меню</strong>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tsd-screen">
+            <div class="tsd-titlebar">ВХОД В СИСТЕМУ</div>
+            <div class="tsd-body">
+              <div class="tsd-instruction">LEAD WMS</div>
+              <hr class="tsd-divider">
+              <div class="tsd-instruction">СКАНИРУЙТЕ ЛИЧНУЮ КАРТОЧКУ ДЛЯ НАЧАЛА РАБОТЫ</div>
+              <div class="tsd-instruction" style="color:#aaa;font-size:0.6rem">leadwms</div>
+            </div>
+            <div class="tsd-button-area">
+              <div class="tsd-btn">Штрихкод (F2)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <span class="icon">ℹ️</span>
+          <p>Состав главного меню зависит от <strong>должности сотрудника</strong>. Кладовщики видят: Все режимы, Инвентаризацию, Отбор, Перемещения и т.д. Погрузчики видят: Перемещения, Информацию по объекту.</p>
+        </div>
+      </div>
+
+      <!-- 2.1 ОТБОР -->
+      <div id="sec-pick" class="manual-section">
+        <div class="section-badge">📖 Раздел 2.1</div>
+        <div class="section-heading">ОТБОР ТОВАРА</div>
+        <p class="section-intro">Раздел «Отбор» предназначен для сбора товаров со склада согласно заданию. В главном меню выберите пункт <strong>«Отбор»</strong>.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Проверьте наличие активного задания</div>
+              <div class="step-desc">При наличии задания ТСД предложит отсканировать этикетку пустого ОС (EPL). Если задания нет — отобразится сообщение об отсутствии сбора.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Отсканируйте этикетку пустого паллета (EPL)</div>
+              <div class="step-desc">После сканирования ТСД откроет новое задание на набор и укажет <strong>полку / место отбора</strong>.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Отсканируйте QR-код сектора</div>
+              <div class="step-desc">ТСД укажет нужный сектор. Допускается использование как распечатанного QR-кода, так и QR-кода с сайта. На экране отобразится задание на отбор с деталями заказа.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="warn-box">
+          <span class="icon">⚠️</span>
+          <p>При отсутствии задания после размещения паллета в транзит ТСД отобразит сообщение <strong>«ЗАДАНИЯ ОТСУТСТВУЮТ ИЛИ НЕТ ДОПУСКА К ВОЛНАМ НАБОРА»</strong>. Ожидайте новое задание.</p>
+        </div>
+      </div>
+
+      <!-- 2.1.1 ОТБОР БЕЗ РАЗДЕЛЕНИЯ -->
+      <div id="sec-pick-simple" class="manual-section">
+        <div class="section-badge">📖 Раздел 2.1.1</div>
+        <div class="section-heading">ОТБОР БЕЗ РАЗДЕЛЕНИЯ</div>
+        <p class="section-intro">Стандартный отбор, когда весь товар помещается на один паллет.</p>
+
+        <div class="flow">
+          <div class="flow-step">Сканировать EPL</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Выполнить набор</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Сканировать следующий EPL</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Разместить в транзит</div>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Отсканировать штрихкод нужного товара</div>
+              <div class="step-desc">ТСД покажет место (полку), товар, артикул и количество. Сканируйте штрихкод упаковки товара.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Ввести фактическое количество</div>
+              <div class="step-desc">Введите реальное количество отобранного товара. Для ввода сканированием нажмите <strong>&lt;0&gt; — ВВОД СКАНИРОВАНИЕМ</strong>.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Разместить паллет в транзит</div>
+              <div class="step-desc">ТСД запросит сканирование QR-кода транзита сектора. Отсканируйте QR-код целевого места (TR-P-XX-XX-XX), нажмите <strong>&lt;1&gt; — РАЗМЕСТИТЬ В ТРАНЗИТ</strong>.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="with-tsd">
+          <div class="text-side">
+            <div class="info-box">
+              <span class="icon">💡</span>
+              <p>Кнопки быстрого доступа на экране набора: <strong>&lt;2&gt; — ЗАКРЫТЬ ТАРУ</strong> (переход к следующему паллету), <strong>&lt;3&gt; — ВЫБОР ПИКИНГА</strong>, <strong>&lt;0&gt; — ПРОПУСТИТЬ</strong>, <strong>X — ВЫХОД</strong></p>
+            </div>
+          </div>
+          <div class="tsd-screen">
+            <div class="tsd-titlebar">НАБОР</div>
+            <div class="tsd-body">
+              <div class="tsd-row"><span class="key">МЕСТО:</span><span class="val">P-01-01-01</span></div>
+              <div class="tsd-row"><span class="key">ТОВАР:</span><span class="val">307 Тепловент.</span></div>
+              <div class="tsd-row"><span class="key">АРТ:</span><span class="val">P0000108292</span></div>
+              <div class="tsd-row"><span class="key">КОЛ-ВО:</span><span class="val">6 шт. x1</span></div>
+              <hr class="tsd-divider">
+              <div class="tsd-instruction">ПОДТВЕРДИТЕ КОЛ-ВО</div>
+            </div>
+            <div class="tsd-button-area">
+              <div class="tsd-btn">&lt;2&gt; ЗАКРЫТЬ ТАРУ</div>
+              <div class="tsd-btn">Штрихкод (F2)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.1.2 ОТБОР С РАЗДЕЛЕНИЕМ -->
+      <div id="sec-pick-split" class="manual-section">
+        <div class="section-badge">📖 Раздел 2.1.2</div>
+        <div class="section-heading">ОТБОР С РАЗДЕЛЕНИЕМ</div>
+        <p class="section-intro">Если товар не помещается на один паллет, его нужно разделить на несколько ОС.</p>
+
+        <div class="flow">
+          <div class="flow-step">Сканировать EPL</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Набор по заданию</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Закрыть тару</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Новый EPL</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">В транзит</div>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Нажмите «Закрыть тару» &lt;2&gt;</div>
+              <div class="step-desc">Когда паллет заполнен, нажмите кнопку <strong>&lt;2&gt; — ЗАКРЫТЬ ТАРУ</strong> на экране набора.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Выберите причину «Не вместилось в тару»</div>
+              <div class="step-desc">В поле причины закрытия тары выберите соответствующий пункт из списка.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Отсканируйте новый пустой ОС (EPL)</div>
+              <div class="step-desc">Появится окно «Сканируйте QR-код пустого ОС (EPL)». Отсканируйте новый пустой паллет и продолжайте отбор.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-title">Разместите собранный ОС в транзитную зону</div>
+              <div class="step-desc">Завершите набор и переместите паллет в транзит согласно указаниям ТСД.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.2 ИНФОРМАЦИЯ ОБ ОС -->
+      <div id="sec-info" class="manual-section">
+        <div class="section-badge">📖 Раздел 2.2</div>
+        <div class="section-heading">ИНФОРМАЦИЯ ОБ ОС</div>
+        <p class="section-intro">Позволяет просмотреть данные по любому объекту складирования путём сканирования его QR-кода.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Перейдите в раздел</div>
+              <div class="step-desc">Главное меню → <strong>Информация</strong> → <strong>Информация по объекту</strong></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Отсканируйте QR-код нужного ОС</div>
+              <div class="step-desc">ТСД отобразит: объект, ячейку, заявку, клиента, материал, артикул, количество и вид запаса.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="with-tsd">
+          <div class="text-side">
+            <div class="info-box">
+              <span class="icon">ℹ️</span>
+              <p>Отображаемые поля: <strong>ОБЪЕКТ</strong> (ID/тип), <strong>КОЛ-ВО ДОЧЕРНИХ</strong>, <strong>ЯЧЕЙКА</strong>, <strong>ЗАЯВКА</strong>, <strong>КЛИЕНТ</strong>, груз, вид запаса, материал, артикул, количество.</p>
+            </div>
+          </div>
+          <div class="tsd-screen">
+            <div class="tsd-titlebar">ДАННЫЕ ОБЪЕКТА</div>
+            <div class="tsd-body">
+              <div class="tsd-row"><span class="key">ОБЪЕКТ:</span><span class="val">T0000295795</span></div>
+              <div class="tsd-row"><span class="key">ЯЧЕЙКА:</span><span class="val">Транзит П</span></div>
+              <div class="tsd-row"><span class="key">ЗАЯВКА:</span><span class="val">Борисов 06.04</span></div>
+              <div class="tsd-row"><span class="key">КЛИЕНТ:</span><span class="val">Форте Хоум</span></div>
+              <hr class="tsd-divider">
+              <div class="tsd-row"><span class="key">МАТ:</span><span class="val">P0000181076</span></div>
+              <div class="tsd-row"><span class="key">КОЛ:</span><span class="val">8 шт. x1</span></div>
+            </div>
+            <div class="tsd-button-area">
+              <div class="tsd-btn">X — ВЫХОД</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.3 РУЧНОЕ ПЕРЕМЕЩЕНИЕ -->
+      <div id="sec-move" class="manual-section">
+        <div class="section-badge">📖 Раздел 2.3</div>
+        <div class="section-heading">РУЧНОЕ ПЕРЕМЕЩЕНИЕ</div>
+        <p class="section-intro">Физическое перемещение ОС (паллетов) с одного места хранения в другое по заданию системы или вручную.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Перейдите в раздел</div>
+              <div class="step-desc">Главное меню → <strong>Все режимы</strong> → <strong>Ручное перемещение товара</strong></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Отсканируйте штрихкод объекта</div>
+              <div class="step-desc">ТСД запросит сканирование штрихкода объекта. В следующем сообщении предложит выбрать из списка товар для перемещения.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Выберите товар и сектор назначения</div>
+              <div class="step-desc">Выберите нужный товар (<strong>&lt;1&gt; — ВЫБРАТЬ ИЗ СПИСКА</strong>). ТСД запросит сканирование QR-кода сектора для размещения.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-title">Укажите количество и подтвердите</div>
+              <div class="step-desc">Введите нужное количество и подтвердите. При отсутствии товара для перемещения — нажмите <strong>«Выход»</strong> для возврата в главное меню.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.4 ИНВЕНТАРИЗАЦИЯ -->
+      <div id="sec-inv" class="manual-section">
+        <div class="section-badge">📖 Раздел 2.4</div>
+        <div class="section-heading">ИНВЕНТАРИЗАЦИЯ</div>
+        <p class="section-intro">Режим «Инвентаризация» предназначен для пересчёта товара в ячейках склада. Задание создаётся оператором в системе и запускается в работу.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Выберите раздел</div>
+              <div class="step-desc">Главное меню → <strong>Инвентаризация</strong> → <strong>Инвентаризация</strong> → <strong>По заданиям</strong></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Отсканируйте штрихкод полки</div>
+              <div class="step-desc">ТСД запросит сканирование ячейки для пересчёта. Отсканируйте штрихкод нужной полки.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Выберите разновидность товара</div>
+              <div class="step-desc">ТСД предложит выбрать вид запаса: Свободный запас, Брак, Карантин, Некондиция, Под контейнер и т.д.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-title">Отсканируйте каждый товар</div>
+              <div class="step-desc">Сканируйте штрихкод материала. Вы также можете ввести штрихкод вручную: <strong>&lt;1&gt; — ВВЕСТИ ШК МАТЕРИАЛА</strong>.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <div class="step-title">Введите фактическое количество</div>
+              <div class="step-desc">Введите реальное количество каждой позиции. Если в ячейке нет товара — подтвердите нулевое количество.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+              <div class="step-title">Подтвердите корректность данных</div>
+              <div class="step-desc">После ввода количества ТСД покажет «ВЕРНЫЕ ДАННЫЕ? &lt;1&gt; — ДА, &lt;3&gt; — НЕТ». Подтвердите ввод. После пересчёта всех позиций задание закрывается автоматически.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <span class="icon">✅</span>
+          <p>После пересчёта всех позиций задание будет <strong>автоматически закрыто</strong>. Результаты передаются оператору для подтверждения в системе.</p>
+        </div>
+      </div>
+
+      <!-- 3.1 ПОГРУЗЧИКИ - ПЕРЕМЕЩЕНИЕ -->
+      <div id="sec-loader-move" class="manual-section">
+        <div class="section-badge">📖 Раздел 3.1</div>
+        <div class="section-heading">ПЕРЕМЕЩЕНИЕ (ПОГРУЗЧИКИ)</div>
+        <p class="section-intro">Основной режим работы для погрузчиков. Доступен через: <strong>Все режимы → Перемещения</strong>.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Проследуйте к транзитной зоне</div>
+              <div class="step-desc">При наличии заданий ТСД отобразит указание переместиться к нужной транзитной зоне. Следуйте указаниям.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Отсканируйте транзитную зону</div>
+              <div class="step-desc">По прибытии <strong>обязательно</strong> отсканируйте этикетку или штрихкод транзитной зоны.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Отсканируйте паллет в транзитной зоне</div>
+              <div class="step-desc">ТСД запросит сканирование паллета (<strong>объекта складирования</strong>), находящегося в транзитной зоне.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-title">Переместите паллет на указанное место</div>
+              <div class="step-desc">ТСД укажет целевое место хранения. Переместите паллет и отсканируйте QR-код целевого места. Оставьте паллет и ожидайте следующего задания.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <span class="icon">💡</span>
+          <p>Для облегчённого поиска паллета — ищите QR-код с <strong>совпадающими последними 4 цифрами</strong> у ОС и паллета. Это ускоряет визуальный поиск на складе.</p>
+        </div>
+      </div>
+
+      <!-- 3.2 ПОГРУЗЧИКИ - ИНФОРМАЦИЯ -->
+      <div id="sec-loader-info" class="manual-section">
+        <div class="section-badge">📖 Раздел 3.2</div>
+        <div class="section-heading">ИНФОРМАЦИЯ ПО ОБЪЕКТУ</div>
+        <p class="section-intro">Режим просмотра данных об ОС для погрузчиков. Путь: <strong>Все режимы → Информация по объекту</strong>.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Перейдите в раздел</div>
+              <div class="step-desc">Главное меню → <strong>Все режимы</strong> → <strong>Информация по объекту</strong></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Отсканируйте QR-код нужного ОС</div>
+              <div class="step-desc">ТСД отобразит все доступные поля информации: объект, ячейка, заявка, клиент, материал, количество.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ QR GENERATOR PAGE ════════════ -->
+<div id="page-qr" class="page">
+  <div class="qr-page">
+    <div class="qr-page-header">
+      <div class="section-badge">⬛ Генератор QR-кодов</div>
+      <div class="section-heading">QR-ГЕНЕРАТОР</div>
+      <p class="section-intro">Создание QR-кодов для авторизации сотрудников, маркировки ячеек, секторов, паллет и складских зон. Совместим с системой LEAD WMS.</p>
+    </div>
+
+    <div class="qr-tabs">
+      <button class="qr-tab active" id="tab-employee" onclick="switchQrTab('employee', this)">👤 Сотрудник</button>
+      <button class="qr-tab" id="tab-cell" onclick="switchQrTab('cell', this)">🏪 Ячейка / Сектор</button>
+      <button class="qr-tab" id="tab-pallet" onclick="switchQrTab('pallet', this)">🪣 Паллет (ОС)</button>
+      <button class="qr-tab" id="tab-dock" onclick="switchQrTab('dock', this)">🚪 Док / Склад</button>
+      <button class="qr-tab" id="tab-transit" onclick="switchQrTab('transit', this)">🔄 Транзит</button>
+    </div>
+
+    <div class="qr-generator-area">
+      <!-- FORM PANEL -->
+      <div class="qr-form-card">
+        <div class="form-title"><span class="emoji" id="qr-form-icon">👤</span><span id="qr-form-title">Данные сотрудника</span></div>
+
+        <!-- Employee form -->
+        <div id="form-employee">
+          <div class="form-group">
+            <label>Фамилия</label>
+            <input type="text" id="emp-lastname" placeholder="Борисов" oninput="generateQR()">
+          </div>
+          <div class="form-group">
+            <label>Имя</label>
+            <input type="text" id="emp-firstname" placeholder="Виктор" oninput="generateQR()">
+          </div>
+          <div class="form-group">
+            <label>Должность</label>
+            <select id="emp-role" onchange="generateQR()">
+              <option value="Кладовщик">Кладовщик</option>
+              <option value="Погрузчик">Погрузчик</option>
+              <option value="Оператор">Оператор</option>
+              <option value="Менеджер">Менеджер</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Табельный номер</label>
+            <input type="text" id="emp-id" placeholder="EMP001" oninput="generateQR()">
+          </div>
+        </div>
+
+        <!-- Cell form -->
+        <div id="form-cell" style="display:none">
+          <div class="form-group">
+            <label>Склад</label>
+            <select id="cell-warehouse" onchange="generateQR()">
+              <option value="ФЛ">ФЛ — Forte Logistics</option>
+              <option value="ФЕ">ФЕ — Forte Engineering</option>
+              <option value="ФХ">ФХ — Forte Home</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Тип ячейки</label>
+            <select id="cell-type" onchange="generateQR()">
+              <option value="P">P — Полка</option>
+              <option value="R">R — Стеллаж</option>
+              <option value="Z">Z — Зона</option>
+              <option value="S">S — Сектор</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Ряд</label>
+              <input type="text" id="cell-row" placeholder="01" oninput="generateQR()" maxlength="2">
+            </div>
+            <div class="form-group">
+              <label>Секция</label>
+              <input type="text" id="cell-section" placeholder="01" oninput="generateQR()" maxlength="2">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Уровень</label>
+            <input type="text" id="cell-level" placeholder="01" oninput="generateQR()" maxlength="2">
+          </div>
+        </div>
+
+        <!-- Pallet form -->
+        <div id="form-pallet" style="display:none">
+          <div class="form-group">
+            <label>Тип ОС</label>
+            <select id="pal-type" onchange="generateQR()">
+              <option value="T">T — Товарный паллет</option>
+              <option value="EPL">EPL — Пустой паллет</option>
+              <option value="TR">TR — Транзитный паллет</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Номер ОС</label>
+            <input type="text" id="pal-num" placeholder="0000295751" oninput="generateQR()">
+          </div>
+          <div class="form-group">
+            <label>Наименование / описание</label>
+            <input type="text" id="pal-desc" placeholder="Европалета" oninput="generateQR()">
+          </div>
+        </div>
+
+        <!-- Dock form -->
+        <div id="form-dock" style="display:none">
+          <div class="form-group">
+            <label>Тип объекта</label>
+            <select id="dock-type" onchange="generateQR()">
+              <option value="DOC">DOC — Погрузочный док</option>
+              <option value="WH">WH — Склад</option>
+              <option value="GATE">GATE — Ворота</option>
+              <option value="AREA">AREA — Рабочая зона</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Номер / Обозначение</label>
+            <input type="text" id="dock-num" placeholder="1" oninput="generateQR()">
+          </div>
+          <div class="form-group">
+            <label>Название</label>
+            <input type="text" id="dock-name" placeholder="Северный док" oninput="generateQR()">
+          </div>
+        </div>
+
+        <!-- Transit form -->
+        <div id="form-transit" style="display:none">
+          <div class="form-group">
+            <label>Транзитная зона</label>
+            <select id="tr-zone" onchange="generateQR()">
+              <option value="Транзит П">Транзит П</option>
+              <option value="Транзит А">Транзит А</option>
+              <option value="Транзит Б">Транзит Б</option>
+              <option value="Транзит В">Транзит В</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Сектор</label>
+            <input type="text" id="tr-sector" placeholder="Сектор A" oninput="generateQR()">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Ряд</label>
+              <input type="text" id="tr-row" placeholder="P-01" oninput="generateQR()">
+            </div>
+            <div class="form-group">
+              <label>Секция</label>
+              <input type="text" id="tr-sec" placeholder="01-01" oninput="generateQR()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREVIEW PANEL -->
+      <div class="qr-preview-card">
+        <div class="qr-preview-title">ПРЕДПРОСМОТР QR-КОДА</div>
+        <div class="qr-canvas-wrapper">
+          <div id="qr-output"></div>
+          <div class="qr-placeholder" id="qr-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h-3zM18 18h3v3h-3zM15 18v3M18 15h3"/></svg>
+            <span>Заполните форму слева</span>
+          </div>
+        </div>
+        <div class="qr-label-display">
+          <div class="lbl-type" id="qr-type-display">ТИП: —</div>
+          <div class="lbl-val" id="qr-value-display">—</div>
+        </div>
+        <div class="qr-action-btns">
+          <button class="btn-download" onclick="downloadQR()">⬇ Скачать PNG</button>
+          <button class="btn-print" onclick="printQR()">🖨 Печать</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BATCH SECTION -->
+    <div class="batch-section">
+      <div class="batch-title">СЕРИЙНАЯ ГЕНЕРАЦИЯ</div>
+      <p style="font-size:0.82rem; color: var(--forte-sub); margin-bottom: 0.5rem;">Быстрое создание набора QR-кодов для типовых объектов. Нажмите на любой QR для увеличенного просмотра.</p>
+
+      <div style="display:flex; gap:12px; margin-bottom:1rem; flex-wrap:wrap;">
+        <div class="form-group" style="flex:1; min-width:140px; margin-bottom:0;">
+          <label>Тип объектов</label>
+          <select id="batch-type" style="width:100%; background: var(--forte-dark); border: 1px solid var(--forte-border); border-radius: 8px; color: var(--forte-text); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 10px 14px; outline: none;">
+            <option value="cell">Ячейки (P-XX-XX-XX)</option>
+            <option value="sector">Секторы (Сектор А/Б/В...)</option>
+            <option value="transit">Транзит (TR-P-XX-XX-XX)</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1; min-width:100px; margin-bottom:0;">
+          <label>Начало с №</label>
+          <input type="number" id="batch-from" value="1" min="1" max="99" style="width:100%; background: var(--forte-dark); border: 1px solid var(--forte-border); border-radius: 8px; color: var(--forte-text); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 10px 14px; outline: none;">
+        </div>
+        <div class="form-group" style="flex:1; min-width:100px; margin-bottom:0;">
+          <label>По №</label>
+          <input type="number" id="batch-to" value="8" min="1" max="99" style="width:100%; background: var(--forte-dark); border: 1px solid var(--forte-border); border-radius: 8px; color: var(--forte-text); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 10px 14px; outline: none;">
+        </div>
+        <div class="form-group" style="display:flex; align-items:flex-end; margin-bottom:0;">
+          <button class="btn-primary" onclick="generateBatch()" style="height:42px; white-space:nowrap;">Создать серию</button>
+        </div>
+      </div>
+
+      <div class="batch-list" id="batch-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════ NAVIGATION ══════════════
+function showPage(pageId, btnEl, sectionId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  else {
+    const map = { home: 0, manual: 1, qr: 2 };
+    const btns = document.querySelectorAll('.nav-btn');
+    if (btns[map[pageId]]) btns[map[pageId]].classList.add('active');
+  }
+
+  if (sectionId) {
+    setTimeout(() => showSection(sectionId), 50);
+  }
+  if (pageId === 'qr' && sectionId) {
+    const tabMap = {
+      'tab-employee': 'employee', 'tab-cell': 'cell',
+      'tab-pallet': 'pallet', 'tab-dock': 'dock'
+    };
+    if (tabMap[sectionId]) {
+      switchQrTab(tabMap[sectionId]);
+    }
+  }
+}
+
+function showSection(sectionId, itemEl) {
+  document.querySelectorAll('.manual-section').forEach(s => s.classList.remove('active'));
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.classList.add('active');
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  if (itemEl) itemEl.classList.add('active');
+}
+
+// ══════════════ QR GENERATOR ══════════════
+let currentQRCode = null;
+let currentQrTab = 'employee';
+
+function switchQrTab(tab, btnEl) {
+  currentQrTab = tab;
+  document.querySelectorAll('.qr-tab').forEach(t => t.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  else document.getElementById('tab-' + tab)?.classList.add('active');
+
+  ['employee','cell','pallet','dock','transit'].forEach(t => {
+    document.getElementById('form-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+
+  const icons = { employee: '👤', cell: '🏪', pallet: '🪣', dock: '🚪', transit: '🔄' };
+  const titles = { employee: 'Данные сотрудника', cell: 'Данные ячейки / сектора', pallet: 'Данные паллета (ОС)', dock: 'Данные дока / склада', transit: 'Данные транзитной зоны' };
+  document.getElementById('qr-form-icon').textContent = icons[tab];
+  document.getElementById('qr-form-title').textContent = titles[tab];
+
+  generateQR();
+}
+
+function buildQRData() {
+  const tab = currentQrTab;
+  let data = '', label = '', type = '';
+
+  if (tab === 'employee') {
+    const ln = document.getElementById('emp-lastname').value.trim();
+    const fn = document.getElementById('emp-firstname').value.trim();
+    const role = document.getElementById('emp-role').value;
+    const id = document.getElementById('emp-id').value.trim();
+    if (!ln && !fn) return null;
+    data = `EMP|${id}|${ln} ${fn}|${role}|FORTE`;
+    label = `${ln} ${fn}`;
+    type = 'СОТРУДНИК';
+  } else if (tab === 'cell') {
+    const wh = document.getElementById('cell-warehouse').value;
+    const ct = document.getElementById('cell-type').value;
+    const row = document.getElementById('cell-row').value.padStart(2,'0') || '01';
+    const sec = document.getElementById('cell-section').value.padStart(2,'0') || '01';
+    const lvl = document.getElementById('cell-level').value.padStart(2,'0') || '01';
+    data = `${ct}-${row}-${sec}-${lvl}`;
+    label = data;
+    type = 'ЯЧЕЙКА';
+  } else if (tab === 'pallet') {
+    const pt = document.getElementById('pal-type').value;
+    const pn = document.getElementById('pal-num').value.trim();
+    const pd = document.getElementById('pal-desc').value.trim();
+    if (!pn) return null;
+    data = `${pt}${pn.padStart(10,'0')}/${pd || 'Паллет'}`;
+    label = `${pt}${pn.padStart(10,'0')}`;
+    type = 'ОБЪЕКТ СКЛАДИРОВАНИЯ';
+  } else if (tab === 'dock') {
+    const dt = document.getElementById('dock-type').value;
+    const dn = document.getElementById('dock-num').value.trim();
+    const dname = document.getElementById('dock-name').value.trim();
+    if (!dn) return null;
+    data = `${dt}-${dn}|${dname}|FORTE`;
+    label = `${dt}-${dn}`;
+    type = 'ДОК / СКЛАД';
+  } else if (tab === 'transit') {
+    const tz = document.getElementById('tr-zone').value;
+    const ts = document.getElementById('tr-sector').value.trim();
+    const tr = document.getElementById('tr-row').value.trim() || 'P-01';
+    const tsec = document.getElementById('tr-sec').value.trim() || '01-01';
+    data = `TR-${tr}-${tsec}|${tz}|${ts}`;
+    label = `TR-${tr}-${tsec}`;
+    type = 'ТРАНЗИТ';
+  }
+
+  return { data, label, type };
+}
+
+function generateQR() {
+  const result = buildQRData();
+  const output = document.getElementById('qr-output');
+  const placeholder = document.getElementById('qr-placeholder');
+
+  if (!result) {
+    output.innerHTML = '';
+    placeholder.style.display = 'flex';
+    document.getElementById('qr-type-display').textContent = 'ТИП: —';
+    document.getElementById('qr-value-display').textContent = '—';
+    if (currentQRCode) { currentQRCode = null; }
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  output.innerHTML = '';
+
+  currentQRCode = new QRCode(output, {
+    text: result.data,
+    width: 180,
+    height: 180,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  document.getElementById('qr-type-display').textContent = 'ТИП: ' + result.type;
+  document.getElementById('qr-value-display').textContent = result.label;
+}
+
+function downloadQR() {
+  const canvas = document.querySelector('#qr-output canvas');
+  if (!canvas) { alert('Сначала заполните форму для генерации QR-кода'); return; }
+  const result = buildQRData();
+  const link = document.createElement('a');
+  link.download = `forte-qr-${result?.label || 'code'}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function printQR() {
+  const canvas = document.querySelector('#qr-output canvas');
+  if (!canvas) { alert('Сначала заполните форму для генерации QR-кода'); return; }
+  const result = buildQRData();
+  const img = canvas.toDataURL('image/png');
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <html><head><title>Forte QR — ${result?.label || ''}</title>
+    <style>
+      body { margin:0; display:flex; flex-direction:column; align-items:center; padding:20px; font-family: monospace; }
+      img { width: 200px; height: 200px; }
+      .lbl { margin-top: 8px; font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+      .type { font-size: 11px; color: #C8102E; letter-spacing: 2px; margin-bottom: 4px; }
+      .logo { font-size: 18px; font-weight: bold; letter-spacing: 3px; margin-bottom: 16px; border-bottom: 2px solid #C8102E; padding-bottom: 8px; }
+    </style></head>
+    <body>
+      <div class="logo">FORTE HOLDING</div>
+      <div class="type">${result?.type || ''}</div>
+      <img src="${img}">
+      <div class="lbl">${result?.label || ''}</div>
+    </body></html>
+  `);
+  win.document.close();
+  win.print();
+}
+
+// ══════════════ BATCH GENERATION ══════════════
+function generateBatch() {
+  const type = document.getElementById('batch-type').value;
+  const from = parseInt(document.getElementById('batch-from').value);
+  const to = parseInt(document.getElementById('batch-to').value);
+  const list = document.getElementById('batch-list');
+  list.innerHTML = '';
+
+  if (to - from > 19) {
+    alert('Максимум 20 объектов за раз');
+    return;
+  }
+
+  for (let i = from; i <= to; i++) {
+    let data = '', label = '', typeLabel = '';
+    const n = String(i).padStart(2, '0');
+
+    if (type === 'cell') {
+      data = `P-${n}-01-01`;
+      label = data;
+      typeLabel = 'ЯЧЕЙКА';
+    } else if (type === 'sector') {
+      const letters = 'АБВГДЕЖЗИК';
+      data = `Сектор ${letters[i-1] || i}`;
+      label = data;
+      typeLabel = 'СЕКТОР';
+    } else if (type === 'transit') {
+      data = `TR-P-${n}-01-01|Транзит П|Сектор A`;
+      label = `TR-P-${n}-01-01`;
+      typeLabel = 'ТРАНЗИТ';
+    }
+
+    const item = document.createElement('div');
+    item.className = 'batch-item';
+    item.innerHTML = `
+      <div class="bi-type">${typeLabel}</div>
+      <div class="bi-qr" id="bqr-${i}"></div>
+      <div class="bi-label">${label}</div>
+    `;
+    item.onclick = () => downloadBatchQR(data, label);
+    list.appendChild(item);
+
+    new QRCode(document.getElementById(`bqr-${i}`), {
+      text: data,
+      width: 68,
+      height: 68,
+      colorDark: "#000",
+      colorLight: "#fff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+}
+
+function downloadBatchQR(data, label) {
+  const tempDiv = document.createElement('div');
+  tempDiv.style.cssText = 'position:absolute;top:-9999px;left:-9999px;';
+  document.body.appendChild(tempDiv);
+
+  const qr = new QRCode(tempDiv, {
+    text: data,
+    width: 256,
+    height: 256,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  setTimeout(() => {
+    const canvas = tempDiv.querySelector('canvas');
+    if (canvas) {
+      const link = document.createElement('a');
+      link.download = `forte-qr-${label}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    document.body.removeChild(tempDiv);
+  }, 100);
+}
+
+// Init
+generateQR();
+</script>
+</body>
+</html>
